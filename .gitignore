@@ -1,0 +1,11 @@
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+
+build/
+dist/
+venv/
+*.egg-info/
+
+tests/flamegraphs/*
+!tests/flamegraphs/.gitkeep
