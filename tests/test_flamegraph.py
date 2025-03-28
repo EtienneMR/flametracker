@@ -1,14 +1,14 @@
 import json
 from random import shuffle
 
-from flametracker import Tracker
+from flametracker import Tracker, wrap
 
 
 def swap(arr, i, j):
     arr[i], arr[j] = arr[j], arr[i]
 
 
-@Tracker.wrap
+@wrap
 def bubble_sort(arr):
     n = len(arr)
     for i in range(n):
@@ -18,7 +18,7 @@ def bubble_sort(arr):
     return arr
 
 
-@Tracker.wrap
+@wrap
 def find_min_index(arr, start):
     min_idx = start
     for j in range(start + 1, len(arr)):
@@ -27,7 +27,7 @@ def find_min_index(arr, start):
     return min_idx
 
 
-@Tracker.wrap
+@wrap
 def selection_sort(arr):
     for i in range(len(arr)):
         min_idx = find_min_index(arr, i)
@@ -35,13 +35,13 @@ def selection_sort(arr):
     return arr
 
 
-@Tracker.wrap
+@wrap
 def shift_elements(arr, start, end):
     for j in range(end, start, -1):
         arr[j] = arr[j - 1]
 
 
-@Tracker.wrap
+@wrap
 def insertion_sort(arr):
     for i in range(1, len(arr)):
         key = arr[i]
@@ -53,7 +53,7 @@ def insertion_sort(arr):
     return arr
 
 
-@Tracker.wrap
+@wrap
 def merge(left_half, right_half):
     merged = []
     i = j = 0
@@ -69,7 +69,7 @@ def merge(left_half, right_half):
     return merged
 
 
-@Tracker.wrap
+@wrap
 def merge_sort(arr):
     if len(arr) <= 1:
         return arr
@@ -79,7 +79,7 @@ def merge_sort(arr):
     return merge(left_half, right_half)
 
 
-@Tracker.wrap
+@wrap
 def partition(arr):
     pivot = arr[len(arr) // 2]
     left = [x for x in arr if x < pivot]
@@ -88,7 +88,7 @@ def partition(arr):
     return left, middle, right
 
 
-@Tracker.wrap
+@wrap
 def quick_sort(arr):
     if len(arr) <= 1:
         return arr
@@ -138,9 +138,9 @@ def test_dict():
 def test_calls():
     with Tracker() as tracker:
         for i in range(1, 4):
-            with Tracker.action(f"Benchmark {10**i} elements"):
+            with tracker.action(f"Benchmark {10**i} elements"):
                 print(f"Generating {10**i} elements")
-                with Tracker.action("Generate", 10**i):
+                with tracker.action("Generate", 10**i):
                     arr = list(range(10**i))
                     shuffle(arr)
                 print("Sorting")

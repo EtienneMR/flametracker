@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `Tracker` library provides a way to track and visualize function calls and execution times within Python programs. It includes features like:
+The `FlameTracker` library provides a way to track and visualize function calls and execution times within Python programs. It includes features like:
 
 - Hierarchical action tracking
 - Timing of function calls
@@ -11,10 +11,10 @@ The `Tracker` library provides a way to track and visualize function calls and e
 
 ## Installation
 
-To use the `Tracker` library, install it in your Python environment:
+To use the `FlameTracker` library, install it in your Python environment:
 
 ```sh
-pip install tracker
+pip install flametracker
 ```
 
 ## Usage
@@ -22,10 +22,9 @@ pip install tracker
 ### Basic Tracking
 
 ```python
-from tracker import Tracker
+import flametracker
 
-tracker = Tracker()
-with tracker:
+with flametracker.Tracker() as tracker:
     with tracker.action("example_action"):
         # Some computation here
         pass
@@ -36,20 +35,24 @@ print(tracker.to_str())
 ### Nested Actions
 
 ```python
-with tracker:
+import flametracker
+
+with flametracker.Tracker() as tracker:
     with tracker.action("parent_action") as parent:
         with tracker.action("child_action") as child:
-            pass
+            child.set_result("Hello for child !")
 ```
 
 ### Function Wrapping
 
 ```python
-@tracker.wrap
+import flametracker
+
+@flametracker.wrap
 def my_function(x):
     return x * 2
 
-with tracker:
+with flametracker.Tracker() as tracker:
     result = my_function(5)
 ```
 
@@ -57,7 +60,7 @@ with tracker:
 
 ```python
 html_output = tracker.to_flamegraph()
-with open("flamegraph.html", "w") as f:
+with open("flamegraph.html", "w", encoding="utf-8") as f:
     f.write(html_output)
 ```
 
