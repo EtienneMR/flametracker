@@ -4,17 +4,13 @@ from random import shuffle
 from flametracker import Tracker, wrap
 
 
-def swap(arr, i, j):
-    arr[i], arr[j] = arr[j], arr[i]
-
-
 @wrap
 def bubble_sort(arr):
     n = len(arr)
     for i in range(n):
         for j in range(0, n - i - 1):
             if arr[j] > arr[j + 1]:
-                swap(arr, j, j + 1)
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
     return arr
 
 
@@ -96,6 +92,15 @@ def quick_sort(arr):
     return quick_sort(left) + middle + quick_sort(right)
 
 
+def test_simple():
+    with Tracker() as tracker:
+        arr = list(range(10**2))
+        shuffle(arr)
+        merge_sort(arr[:])
+    with open("tests/renders/simple.html", "w", encoding="utf-8") as f:
+        f.write(tracker.to_flamegraph(splited=True, use_calls_as_value=True))
+
+
 def test_splited():
     with Tracker() as tracker:
         arr = list(range(10**3))
@@ -105,7 +110,7 @@ def test_splited():
         insertion_sort(arr[:])
         merge_sort(arr[:])
         quick_sort(arr[:])
-    with open("tests/flamegraphs/splited.html", "w", encoding="utf-8") as f:
+    with open("tests/renders/splited.html", "w", encoding="utf-8") as f:
         f.write(tracker.to_flamegraph(splited=True))
 
 
@@ -118,7 +123,7 @@ def test_str():
         insertion_sort(arr[:])
         merge_sort(arr[:])
         quick_sort(arr[:])
-    with open("tests/flamegraphs/str.txt", "w", encoding="utf-8") as f:
+    with open("tests/renders/str.txt", "w", encoding="utf-8") as f:
         f.write(tracker.to_str())
 
 
@@ -131,7 +136,7 @@ def test_dict():
         insertion_sort(arr[:])
         merge_sort(arr[:])
         quick_sort(arr[:])
-    with open("tests/flamegraphs/dict.json", "w", encoding="utf-8") as f:
+    with open("tests/renders/dict.json", "w", encoding="utf-8") as f:
         json.dump(tracker.to_dict(), f, indent=4)
 
 
@@ -147,8 +152,6 @@ def test_calls():
                 merge_sort(arr[:])
                 quick_sort(arr[:])
 
-    print("Generating render")
     render = tracker.to_render(0.01, True)
-    print("Generating flamegraph")
-    with open("tests/flamegraphs/calls.html", "w", encoding="utf-8") as f:
+    with open("tests/renders/calls.html", "w", encoding="utf-8") as f:
         f.write(render.to_flamegraph(False))

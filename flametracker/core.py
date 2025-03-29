@@ -45,19 +45,24 @@ class Tracker:
 
         return False
 
-    def to_render(self, group_min_percent: float, use_calls_as_value: bool):
+    def to_render(self, group_min_percent: float, use_calls_as_value: "bool|dict"):
         return RenderNode.from_action(
             self.root, group_min_percent * self.root.length, use_calls_as_value
         )
 
-    def to_dict(self, group_min_percent: float = 0.01, use_calls_as_value=False):
+    def to_dict(
+        self, group_min_percent: float = 0.01, use_calls_as_value: "bool|dict" = False
+    ):
         return self.to_render(group_min_percent, use_calls_as_value).to_dict()
 
     def to_str(self, group_min_percent: float = 0.1, ignore_args: bool = False):
         return self.to_render(group_min_percent, True).to_str(ignore_args)
 
     def to_flamegraph(
-        self, group_min_percent: float = 0.01, splited=False, use_calls_as_value=False
+        self,
+        group_min_percent: float = 0.01,
+        splited=False,
+        use_calls_as_value: "bool|dict" = False,
     ):
         return self.to_render(group_min_percent, use_calls_as_value).to_flamegraph(
             splited,

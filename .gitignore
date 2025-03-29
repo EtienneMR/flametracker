@@ -8,5 +8,5 @@ venv/
 dev/
 *.egg-info/
 
-tests/flamegraphs/*
-!tests/flamegraphs/.gitkeep
+tests/renders/*
+!tests/renders/.gitkeep
