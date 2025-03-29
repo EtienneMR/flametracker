@@ -1,3 +1,32 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "flametracker"
+description = "A script tracking utility to generate flamegraph"
+readme = "README.md"
+authors = [
+    { name = "Etienne_MR", email = "etienne@etiennemr.fr" }
+]
+license = { text = "MIT" }
+keywords = ["flamegraph", "profiling", "tracking"]
+urls = { "Homepage" = "https://github.com/EtienneMR/flametracker" }
+packages = ["flametracker"]
+requires-python = ">=3.6"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools]
+packages = "find:"
+
+[tool.setuptools-git-versioning]
+enabled = true
+version_file = "VERSION"
+count_commits_from_version_file = true
+
+[tool.setuptools.package-data]
+flametracker = ["py.typed"]
+version_file = "VERSION"
