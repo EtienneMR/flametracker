@@ -12,7 +12,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../flametracker"))
+sys.path.insert(0, os.path.abspath("../../flametracker"))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information

@@ -112,7 +112,7 @@ jobs:
           python-version: "3.x"
       - name: Install dependencies
         run: |
-          pip install sphinx pydata_sphinx_theme myst_parser
+          pip install sphinx pydata_sphinx_theme
       - name: Sphinx build
         run: |
           sphinx-build docs/source/ docs/build/
