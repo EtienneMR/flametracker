@@ -8,8 +8,32 @@ permissions:
   contents: write
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      test: ${{ steps.changes.outputs.test }}
+      build: ${{ steps.changes.outputs.build }}
+      docs: ${{ steps.changes.outputs.docs }}
+      push: ${{ github.event_name == 'push' }}
+      main: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            test:
+              - 'tests/**'
+              - 'flametracker/**'
+            build:
+              - 'flametracker/**'
+            docs:
+              - 'docs/**'
+
   test:
     name: Run Tests
+    needs: changes
+    if: needs.changes.outputs.test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -28,7 +52,8 @@ jobs:
   build:
     name: Build Python Distribution
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    needs: changes
+    if: needs.changes.outputs.push && needs.changes.outputs.build
 
     steps:
       - name: Checkout Repository
@@ -53,10 +78,11 @@ jobs:
 
   publish-to-pypi:
     name: Publish to PyPI on Tag Push
-    if: github.ref == 'refs/heads/main'
+    if: needs.changes.outputs.main
     needs:
       - build
       - test
+      - changes
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -75,9 +101,11 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
+    if: needs.changes.outputs.main
     needs:
       - build
       - test
+      - changes
     runs-on: ubuntu-latest
 
     environment:
@@ -100,9 +128,8 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    needs:
-      - build
+    if: needs.changes.outputs.docs && needs.changes.outputs.push && needs.changes.outputs.main
+    needs: changes
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -113,6 +140,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install sphinx pydata_sphinx_theme
+      - name: Install flametracker
+        run: |
+          pip install -e .
       - name: Sphinx build
         run: |
           sphinx-build docs/source/ docs/build/
