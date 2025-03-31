@@ -11,9 +11,9 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      test: ${{ steps.changes.outputs.test == 'true' }}
-      build: ${{ steps.changes.outputs.build == 'true' }}
-      docs: ${{ steps.changes.outputs.docs == 'true' }}
+      test: ${{ steps.changes.outputs.test }}
+      build: ${{ steps.changes.outputs.build }}
+      docs: ${{ steps.changes.outputs.docs }}
       push: ${{ github.event_name == 'push' }}
       main: ${{ github.ref == 'refs/heads/main' }}
     steps:
@@ -35,7 +35,7 @@ jobs:
   test:
     name: Run Tests
     needs: changes
-    if: needs.changes.outputs.test || needs.changes.outputs.build
+    if: needs.changes.outputs.test == 'true' || needs.changes.outputs.build == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -55,7 +55,7 @@ jobs:
     name: Build Python Distribution
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.push && needs.changes.outputs.build
+    if: needs.changes.outputs.push == 'true' && needs.changes.outputs.build == 'true'
 
     steps:
       - name: Checkout Repository
@@ -80,7 +80,7 @@ jobs:
 
   publish-to-pypi:
     name: Publish to PyPI
-    if: needs.changes.outputs.main
+    if: needs.changes.outputs.main == 'true'
     needs:
       - build
       - test
@@ -103,7 +103,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    if: needs.changes.outputs.main
+    if: needs.changes.outputs.main == 'true'
     needs:
       - build
       - test
@@ -130,7 +130,7 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    if: needs.changes.outputs.docs && needs.changes.outputs.push && needs.changes.outputs.main
+    if: needs.changes.outputs.docs == 'true' && needs.changes.outputs.push == 'true' && needs.changes.outputs.main == 'true'
     needs: changes
     steps:
       - name: Checkout Repository
