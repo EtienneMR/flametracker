@@ -11,14 +11,16 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      test: ${{ steps.changes.outputs.test }}
-      build: ${{ steps.changes.outputs.build }}
-      docs: ${{ steps.changes.outputs.docs }}
+      test: ${{ steps.changes.outputs.test == 'true' }}
+      build: ${{ steps.changes.outputs.build == 'true' }}
+      docs: ${{ steps.changes.outputs.docs == 'true' }}
       push: ${{ github.event_name == 'push' }}
       main: ${{ github.ref == 'refs/heads/main' }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Check changes
+        uses: dorny/paths-filter@v2
         id: changes
         with:
           filters: |
@@ -33,7 +35,7 @@ jobs:
   test:
     name: Run Tests
     needs: changes
-    if: needs.changes.outputs.test
+    if: needs.changes.outputs.test || needs.changes.outputs.build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -77,7 +79,7 @@ jobs:
           path: dist/
 
   publish-to-pypi:
-    name: Publish to PyPI on Tag Push
+    name: Publish to PyPI
     if: needs.changes.outputs.main
     needs:
       - build
