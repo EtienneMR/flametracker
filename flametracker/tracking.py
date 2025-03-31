@@ -5,6 +5,11 @@ from flametracker.types import Tracker
 
 
 class ActionNode:
+    """
+    Represents a single action or event in the tracker, including its timing,
+    arguments, result, and child actions.
+    """
+
     __slots__ = (
         "tracker",
         "parent",
@@ -40,12 +45,27 @@ class ActionNode:
 
     @property
     def length(self) -> float:
+        """
+        Calculates the duration of the action in milliseconds.
+
+        Returns:
+            The duration of the action.
+        """
         return (self.end - self.start) * 1000
 
     def set_result(self, result):
+        """
+        Sets the result of the action.
+
+        Args:
+            result: The result to set.
+        """
         self.result = result
 
     def __enter__(self):
+        """
+        Starts timing the action and sets it as the current node in the tracker.
+        """
         assert (
             self.tracker.current == self.parent
         ), "Tracker's current node does not match the parent node"
@@ -55,6 +75,9 @@ class ActionNode:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Stops timing the action and reverts the current node in the tracker.
+        """
         assert (
             self.tracker.current == self
         ), "Tracker's current node does not match this node"
@@ -70,6 +93,20 @@ class ActionNode:
         kargs: dict,
         result,
     ):
+        """
+        Creates an event node without timing.
+
+        Args:
+            tracker: The tracker instance.
+            parent: The parent action node.
+            group: The name of the event.
+            args: Positional arguments for the event.
+            kargs: Keyword arguments for the event.
+            result: The result of the event.
+
+        Returns:
+            An ActionNode instance representing the event.
+        """
         assert (
             tracker.current == parent
         ), "Tracker's current node does not match the parent node."

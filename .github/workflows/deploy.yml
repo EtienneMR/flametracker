@@ -1,5 +1,11 @@
 name: Deploy workflow
-on: push
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
+
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -22,6 +28,7 @@ jobs:
   build:
     name: Build Python Distribution
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout Repository
@@ -90,3 +97,29 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+
+  docs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs:
+      - build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set Up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          pip install sphinx pydata_sphinx_theme myst_parser
+      - name: Sphinx build
+        run: |
+          sphinx-build docs/source/ docs/build/
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/
+          force_orphan: true

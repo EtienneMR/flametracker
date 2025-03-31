@@ -6,6 +6,11 @@ from flametracker.types import ActionNode
 
 
 class RenderNode:
+    """
+    Represents a rendered view of an action node, including its duration,
+    call counts, and child nodes.
+    """
+
     __slots__ = (
         "avg_action_time",
         "group",
@@ -36,6 +41,15 @@ class RenderNode:
         self.use_calls_as_value = use_calls_as_value
 
     def format_args(self, with_result=True):
+        """
+        Formats the arguments and result of the action for display.
+
+        Args:
+            with_result: Whether to include the result in the output.
+
+        Returns:
+            A formatted string of the arguments and result.
+        """
         return (
             "("
             + ", ".join(
@@ -47,17 +61,36 @@ class RenderNode:
         )
 
     def group_with(self, other: "RenderNode"):
+        """
+        Groups this node with another node of the same group.
+
+        Args:
+            other: The other RenderNode to group with.
+        """
         assert self.action.group == other.action.group
         self.calls.update(other.calls)
         self.scale(1 + other.length / self.length, 1)
 
     def scale(self, length_factor: float, group_add: int):
+        """
+        Scales the duration and group size of this node and its children.
+
+        Args:
+            length_factor: The factor by which to scale the duration.
+            group_add: The number of groups to add.
+        """
         self.length *= length_factor
         self.group_size += group_add
         for child in self.children:
             child.scale(length_factor, self.group_size)
 
     def get_value(self):
+        """
+        Calculates the value of this node based on its duration or call counts.
+
+        Returns:
+            The calculated value.
+        """
         if self.use_calls_as_value:
             return sum(
                 calls * self.use_calls_as_value.get(group, 1)
@@ -67,6 +100,12 @@ class RenderNode:
             return self.length
 
     def to_dict(self) -> dict:
+        """
+        Converts this node and its children into a dictionary representation.
+
+        Returns:
+            A dictionary representation of this node.
+        """
         length_decimal_places = -floor(
             min(log10(self.length) if self.length != 0 else 0, -2)
         )
@@ -81,6 +120,15 @@ class RenderNode:
         }
 
     def to_str(self, ignore_args):
+        """
+        Converts this node and its children into a string representation.
+
+        Args:
+            ignore_args: Whether to ignore arguments in the output.
+
+        Returns:
+            A string representation of this node.
+        """
         args = "" if ignore_args else self.format_args(False)
         result = "" if ignore_args else " " + repr(self.action.result)
 
@@ -105,6 +153,15 @@ class RenderNode:
             )
 
     def to_flamegraph(self, splited):
+        """
+        Converts this node and its children into a flamegraph HTML representation.
+
+        Args:
+            splited: Whether to split the flamegraph by root children.
+
+        Returns:
+            A string containing the flamegraph HTML.
+        """
         base = """<!DOCTYPE html>
 <html>
   <head>
@@ -163,6 +220,17 @@ class RenderNode:
     def from_action(
         action: "ActionNode", group_min_time: float, use_calls_as_value: "bool|dict"
     ) -> "RenderNode":
+        """
+        Creates a RenderNode from an ActionNode.
+
+        Args:
+            action: The ActionNode to render.
+            group_min_time: Minimum time to group actions.
+            use_calls_as_value: Whether to use call counts as values.
+
+        Returns:
+            A RenderNode instance.
+        """
         children = [
             RenderNode.from_action(child, group_min_time, use_calls_as_value)
             for child in action.children
