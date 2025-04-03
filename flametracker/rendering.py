@@ -148,7 +148,7 @@ class RenderNode:
         else:
             return (
                 self.group
-                + (args if self.group_size == 1 else f" x{self.group_size}")
+                + (args + " ─>" + result if self.group_size == 1 else f" x{self.group_size}")
                 + f" {self.length:.2f}ms"
             )
 
