@@ -91,7 +91,7 @@ class RenderNode:
         Returns:
             The calculated value.
         """
-        if self.use_calls_as_value:
+        if self.use_calls_as_value != False:
             return sum(
                 calls * self.use_calls_as_value.get(group, 1)
                 for group, calls in self.calls.items()
