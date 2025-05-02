@@ -1,7 +1,7 @@
 import json
 from random import shuffle
 
-from flametracker import Tracker, wrap
+from flametracker import Tracker, wrap, file_flamegraph
 
 
 @wrap
@@ -98,7 +98,7 @@ def test_simple():
         shuffle(arr)
         merge_sort(arr[:])
     with open("tests/renders/simple.html", "w", encoding="utf-8") as f:
-        f.write(tracker.to_flamegraph(splited=True, use_calls_as_value=True))
+        f.write(tracker.to_flamegraph(splited=True, use_calls_as_value={}))
 
 
 def test_splited():
@@ -152,6 +152,12 @@ def test_calls():
                 merge_sort(arr[:])
                 quick_sort(arr[:])
 
-    render = tracker.to_render(0.01, True)
+    render = tracker.to_render(0.01, None)
     with open("tests/renders/calls.html", "w", encoding="utf-8") as f:
         f.write(render.to_flamegraph(False))
+
+def test_file_flamegraph():
+    with file_flamegraph("tests/renders/file_flamegraph"):
+        arr = list(range(10**2))
+        shuffle(arr)
+        bubble_sort(arr[:])

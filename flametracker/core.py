@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from functools import wraps
 from typing import cast
 
@@ -66,7 +67,7 @@ class Tracker:
 
         return False
 
-    def to_render(self, group_min_percent: float, use_calls_as_value: "bool|dict"):
+    def to_render(self, group_min_percent: float, use_calls_as_value: dict | None):
         """
         Converts the tracked actions into a RenderNode for visualization.
 
@@ -82,7 +83,7 @@ class Tracker:
         )
 
     def to_dict(
-        self, group_min_percent: float = 0.01, use_calls_as_value: "bool|dict" = False
+        self, group_min_percent: float = 0.01, use_calls_as_value: dict | None = None
     ):
         """
         Converts the tracked actions into a dictionary representation.
@@ -107,13 +108,13 @@ class Tracker:
         Returns:
             A string representation of the tracked actions.
         """
-        return self.to_render(group_min_percent, True).to_str(ignore_args)
+        return self.to_render(group_min_percent, {}).to_str(ignore_args)
 
     def to_flamegraph(
         self,
         group_min_percent: float = 0.01,
         splited=False,
-        use_calls_as_value: "bool|dict" = False,
+        use_calls_as_value: dict | None = None,
     ):
         """
         Converts the tracked actions into a flamegraph HTML representation.
@@ -230,3 +231,70 @@ def wrap(fn: F) -> F:
             return fn(*args, **kargs)
 
     return cast(F, call)
+
+@contextmanager
+def file_flamegraph(
+    source_file: str,
+    group_min_percent: float = 0.01,
+    splited: bool = False,
+    use_calls_as_value: None | dict = None,
+):
+    """
+    Context manager for generating a flamegraph HTML file while tracking function execution.
+
+    This function creates an HTML file that updates in real-time to indicate the progress
+    of the flamegraph generation. It uses the `Tracker` class to monitor the execution
+    of code within the context and generates a flamegraph upon completion.
+
+    Args:
+        source_file (str): The base name of the output HTML file (without extension).
+        group_min_percent (float, optional): Minimum percentage of total time to group actions. Defaults to 0.01.
+        splited (bool, optional): Whether to split the flamegraph by root children. Defaults to False.
+        use_calls_as_value (None | dict, optional): Whether to use call counts as values or provide a mapping. Defaults to False.
+
+    Yields:
+        Tracker: An instance of the `Tracker` class to monitor actions and events.
+
+    Example:
+        with file_flamegraph("output") as tracker:
+            # Code to track
+            some_function()
+
+    The resulting flamegraph will be saved as "output.flamegraph.html".
+    """
+    try:
+        with open(source_file + ".flamegraph.html", "w+") as f:
+            f.write("""<!DOCTYPE html>
+<html>
+  <head>
+    <title>flametracker - generating</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="refresh" content="5">
+  <body>
+    <p>Running your function...</p>
+  </body>
+</html>""")
+            f.flush()
+            with Tracker() as tracker:
+                yield tracker
+            f.seek(0)
+            f.truncate()
+            f.write("""<!DOCTYPE html>
+<html>
+  <head>
+    <title>flametracker - generating</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="refresh" content="5">
+  <body>
+    <p>Generating flamegraph...</p>
+  </body>
+</html>""")
+            f.flush()
+            flamegaprh = tracker.to_flamegraph(group_min_percent, splited, use_calls_as_value)
+            f.seek(0)
+            f.truncate()
+            f.write(flamegaprh)
+    finally:  
+        pass

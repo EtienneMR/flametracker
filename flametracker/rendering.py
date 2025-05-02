@@ -1,6 +1,7 @@
 from collections import Counter
 from json import dumps
 from math import floor, log10
+from typing import Literal
 
 from flametracker.types import ActionNode
 
@@ -27,10 +28,8 @@ class RenderNode:
         action: "ActionNode",
         calls: "Counter[str]",
         children: "list[RenderNode]",
-        use_calls_as_value: "bool|dict",
+        use_calls_as_value: "None|dict",
     ):
-        if use_calls_as_value == True:
-            use_calls_as_value = {}
 
         self.group = action.group
         self.length = action.length
@@ -91,7 +90,7 @@ class RenderNode:
         Returns:
             The calculated value.
         """
-        if self.use_calls_as_value != False:
+        if self.use_calls_as_value is not None:
             return sum(
                 calls * self.use_calls_as_value.get(group, 1)
                 for group, calls in self.calls.items()
@@ -218,7 +217,7 @@ class RenderNode:
 
     @staticmethod
     def from_action(
-        action: "ActionNode", group_min_time: float, use_calls_as_value: "bool|dict"
+        action: "ActionNode", group_min_time: float, use_calls_as_value: dict | None
     ) -> "RenderNode":
         """
         Creates a RenderNode from an ActionNode.

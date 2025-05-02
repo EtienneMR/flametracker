@@ -33,7 +33,7 @@ def test_render_node_to_dict():
             sleep(0.05)
             action.set_result("rendered")
 
-    render_node = tracker.to_render(0.01, False)
+    render_node = tracker.to_render(0.01, None)
     render_dict = render_node.to_dict()
     assert isinstance(render_dict, dict)
     assert "name" in render_dict
@@ -116,7 +116,7 @@ def test_tracker_to_dict_nested():
                 child.set_result("child_done")
             parent.set_result("parent_done")
 
-    render_dict = tracker.to_dict(0.01, False)
+    render_dict = tracker.to_dict(0.01)
     assert render_dict["name"] == "@root() -> ()"
     assert len(render_dict["children"]) == 1
     assert render_dict["children"][0]["name"] == "parent_action() -> 'parent_done'"
