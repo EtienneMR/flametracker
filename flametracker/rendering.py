@@ -68,7 +68,8 @@ class RenderNode:
         """
         assert self.action.group == other.action.group
         self.calls.update(other.calls)
-        self.scale(1 + other.length / self.length, 1)
+        if self.length > 0:
+            self.scale(1 + other.length / self.length, 1)
 
     def scale(self, length_factor: float, group_add: int):
         """
